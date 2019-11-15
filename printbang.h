@@ -65,13 +65,12 @@ This also minimizes the cycles spent in time-critical code.
 - Basic Arduino Serial-style formatting for numeric data types
 - Doesn't depend on the Arduino core or the C++ runtime
 - Doesn't depend on avr-libc formatting
+- State- and heapless
 
 ## Caveats
 
 - Recursive formatting routines can result in heavy stack load for long integers
 - Interrupts are masked during transmission of a word
-
-## Documentation
 **/
 
 #ifndef PRINTBANG_H
@@ -84,6 +83,7 @@ This also minimizes the cycles spent in time-critical code.
 #define PRINTBANG_VERSION_MAJOR 0
 #define PRINTBANG_VERSION_MINOR 1
 
+/// ## Documentation
 /// ### Configuration macros
 
 /**
@@ -561,7 +561,7 @@ void bang(double value, unsigned char places = 4) { bang_float(value, places); }
     char: bang_char, \
     unsigned char: bang_char, \
     char *: bang_str, \
-    const char *: bang_pstr \
+    const char *: bang_pstr, \
     int: bang_int, \
     unsigned int: bang_uint, \
     long: bang_long, \

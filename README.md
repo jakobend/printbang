@@ -39,12 +39,12 @@ This also minimizes the cycles spent in time-critical code.
 - Basic Arduino Serial-style formatting for numeric data types
 - Doesn't depend on the Arduino core or the C++ runtime
 - Doesn't depend on avr-libc formatting
+- State- and heapless
 
 ## Caveats
 
 - Recursive formatting routines can result in heavy stack load for long integers
 - Interrupts are masked during transmission of a word
-
 ## Documentation
 ### Configuration macros
 
