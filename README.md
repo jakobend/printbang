@@ -7,7 +7,6 @@ A modest serial transmitter for AVR MCUs in restricted circumstances.
 ```c
 #define PRINTBANG_PORT PORTB
 #define PRINTBANG_PIN PB0
-#define PRINTBANG_WANT_INT
 #define PRINTBANG_IMPLEMENTATION
 #include "printbang.h"
 // ...
@@ -48,11 +47,11 @@ This also minimizes the cycles spent in time-critical code.
 ## Documentation
 ### Configuration macros
 
-#### `HAVE_PRINTBANG_CONFIG_H` ([source](printbang.h#L90))
+#### `HAVE_PRINTBANG_CONFIG_H` ([source](printbang.h#L89))
 If this macro is defined, `<printbang_config.h>` will be included before
 `printbang.h`.
 
-#### `PRINTBANG_PORT` and `PRINTBANG_PORT_IO` ([source](printbang.h#L99))
+#### `PRINTBANG_PORT` and `PRINTBANG_PORT_IO` ([source](printbang.h#L98))
 Either of these macros define the port of the pin used for serial output.
 
 If `PRINTBANG_PORT_IO` is not defined, it will be derived from `PRINTBANG_PORT`
@@ -63,7 +62,7 @@ by subtracting the SFR memory offset from it:
 #define PRINTBANG_PORT_IO _SFR_IO_ADDR(PORTA)
 ```
 
-#### `PRINTBANG_PIN` and `PRINTBANG_PIN_MASK` ([source](printbang.h#L120))
+#### `PRINTBANG_PIN` and `PRINTBANG_PIN_MASK` ([source](printbang.h#L119))
 Either of these macros define the pin(s) on the chosen port to be used for
 serial output.
 
@@ -75,7 +74,7 @@ by converting it into a bit mask:
 #define PRINTBANG_PIN_MASK _BV(PA0)
 ```
 
-#### `PRINTBANG_DELAY` ([source](printbang.h#L142))
+#### `PRINTBANG_DELAY` ([source](printbang.h#L141))
 This macro is an inline assembly snippet that limits the speed of the
 transmission routine to a particular baudrate. If it is not defined, the
 following defaults are used for common clock frequencies:
@@ -84,18 +83,18 @@ following defaults are used for common clock frequencies:
 - 8MHz: 250000 baud, 24 delay cycles, 0% deviation
 - 4MHz: 250000 baud, 8 delay cycles, 0% deviation
 
-#### `PRINTBANG_DELAY_CLOBBER` ([source](printbang.h#L190))
+#### `PRINTBANG_DELAY_CLOBBER` ([source](printbang.h#L189))
 This macro will be used as the clobber section of the inline assembly and allows
 delay snippets to clobber registers, e.g. for looping.
 
 TODO: Use a temporary variable instead
 
-#### `PRINTBANG_PARITY_EVEN` and `PRINTBANG_PARITY_ODD` ([source](printbang.h#L201))
+#### `PRINTBANG_PARITY_EVEN` and `PRINTBANG_PARITY_ODD` ([source](printbang.h#L200))
 If one of these macros is defined, a bit with the given parity will be appended
 to every transmitted word. This functionality depends on avr-libc's
 `util/parity.h`.
 
-#### `PRINTBANG_DATA_BITS` ([source](printbang.h#L211))
+#### `PRINTBANG_DATA_BITS` ([source](printbang.h#L210))
 This macro defines the number of data bits transmitted per word. Counting always
 starts at the least significant bit; if MSB-first transmission is used, the byte
 will be aligned to the left side.
@@ -105,15 +104,15 @@ will be aligned to the left side.
 #define PRINTBANG_DATA_BITS 7
 ```
 
-#### `PRINTBANG_ORDER_MSB` ([source](printbang.h#L226))
+#### `PRINTBANG_ORDER_MSB` ([source](printbang.h#L225))
 If this macro is defined, transmission will occur in MSB-first order. Otherwise,
 LSB-first order will be used.
 
-#### `PRINTBANG_LINE_ENDING` ([source](printbang.h#L235))
+#### `PRINTBANG_LINE_ENDING` ([source](printbang.h#L234))
 This macro expands to a string literal that will be used by `bangln` to
 terminate a line. It defaults to `"\r\n"`.
 
-#### `PRINTBANG_IMPLEMENTATION` ([source](printbang.h#L244))
+#### `PRINTBANG_IMPLEMENTATION` ([source](printbang.h#L243))
 printbang is a *header-only* library. When including it, its functions are
 declared, but only defined if this macro is set.
 
@@ -121,56 +120,45 @@ The recommended way of using printbang in your project involves setting
 `PRINTBANG_IMPLEMENTATION` in a single source file, most commonly wherever your
 main function is located. All other source files can then include `printbang.h`
 without defining this macro.
-
-Note that the `PRINTBANG_WANT_x` macros need to be defined whenever their
-respective functions should be declared.
 ### Character and string transmission
 
-#### `void bang_char(char value)` ([source](printbang.h#L290))
+#### `void bang_char(char value)` ([source](printbang.h#L277))
 Transmits a single word over the serial pin. Interrupts are masked during the
 runtime of this function.
 
-#### `void bang_str(const char *str)` ([source](printbang.h#L384))
+#### `void bang_str(const char *str)` ([source](printbang.h#L371))
 Transmits a null-terminated string from RAM. Calling this function on a
 program-space string will result in garbage being transmitted.
 
-#### `void bang_pstr(PGM_P str)` ([source](printbang.h#L398))
+#### `void bang_pstr(PGM_P str)` ([source](printbang.h#L385))
 Transmits a null-terminated string from program space. Calling this function on
 a RAM string will result in garbage being transmitted.
 ### Integer and floating point transmission
 
-#### `PRINTBANG_WANT_INT` ([source](printbang.h#L440))
-#### `void bang_uint(unsigned int value, unsigned char base)`
+#### `void bang_uint(unsigned int value, unsigned char base)` ([source](printbang.h#L427))
 #### `void bang_int(int value, unsigned char base)`
-If `PRINTBANG_WANT_INT` is defined, the functions for transmitting
-`unsigned int` and `int` values will be declared or defined. The passed value is
+Transmits `unsigned int` respectively `int` values. The passed value is
 formatted in a given `base`.
 
-#### `PRINTBANG_WANT_LONG` ([source](printbang.h#L452))
-#### `void bang_ulong(unsigned long value, unsigned char base)`
+#### `void bang_ulong(unsigned long value, unsigned char base)` ([source](printbang.h#L435))
 #### `void bang_long(long value, unsigned char base)`
-If `PRINTBANG_WANT_LONG` is defined, the functions for transmitting
-`unsigned long` and `long` values will be declared or defined. The passed value
+Transmits `unsigned long` respectively `long` values. The passed value is
+formatted in a given `base`.
+
+#### `void bang_ulonglong(unsigned long long value, unsigned char base` ([source](printbang.h#L443))
+#### `void bang_longlong(long long value, unsigned char base)`
+Transmits `unsigned long long` respectively `long long` values. The passed value
 is formatted in a given `base`.
 
-#### `PRINTBANG_WANT_LONG_LONG` ([source](printbang.h#L464))
-#### `void bang_ulonglong(unsigned long long value, unsigned char base`
-#### `void bang_longlong(long long value, unsigned char base)`
-If `PRINTBANG_WANT_LONG_LONG` is defined, the functions for transmitting
-`unsigned long long` and `long long` values will be declared or defined. The
-passed value is formatted in a given `base`.
-
-#### `PRINTBANG_WANT_FLOAT` ([source](printbang.h#L478))
-#### `void bang_float(float value, unsigned char base)`
-If `PRINTBANG_WANT_FLOAT` is defined, the function for transmitting `float`
-values will be declared or defined. The floating point formatting is very
-rudimentary and will simply concatenate the number to a given number of decimal
-`places`. One trailing zero is always appended.
+#### `void bang_float(float value, unsigned char base)` ([source](printbang.h#L453))
+Transmits `float` values. The floating point formatting is very rudimentary and
+will simply concatenate the number to a given number of decimal `places`. One
+trailing zero is always appended.
 
 Since `double` is an alias for `float` in avr-libc, this function should be used
 for `double` values as well.
 
-#### `void bang(...)` ([source](printbang.h#L522))
+#### `void bang(...)` ([source](printbang.h#L493))
 `bang` provides a simple generic wrapper to all `bang_x` functions. If C++ is
 used, it is implemented as an overloaded wrapper function. If C is used, it is
 implemented as a `_Generic` macro.
@@ -181,6 +169,6 @@ at compile-time, all constant strings are handled as program-space pointers by
 call `bang_str` directly, but consider wrapping it in `PSTR(...)` to put it
 in program space instead and save memory.
 
-#### `void bangln(...)` ([source](printbang.h#L578))
+#### `void bangln(...)` ([source](printbang.h#L541))
 This is a macro that first calls `bang` on the passed arguments and then
 `bang_pstr` on `printbang_line_ending`.

@@ -33,7 +33,6 @@ A modest serial transmitter for AVR MCUs in restricted circumstances.
 ```c
 #define PRINTBANG_PORT PORTB
 #define PRINTBANG_PIN PB0
-#define PRINTBANG_WANT_INT
 #define PRINTBANG_IMPLEMENTATION
 #include "printbang.h"
 // ...
@@ -256,25 +255,13 @@ void bang_char(char value);
 void bang_str(const char *str);
 void bang_pstr(PGM_P str);
 
-/**
-Note that the `PRINTBANG_WANT_x` macros need to be defined whenever their
-respective functions should be declared.
-**/
-#ifdef PRINTBANG_WANT_INT
 void bang_uint(unsigned int value, unsigned char base);
 void bang_int(int value, unsigned char base);
-#endif
-#ifdef PRINTBANG_WANT_LONG
 void bang_ulong(unsigned long value, unsigned char base);
 void bang_long(long value, unsigned char base);
-#endif
-#ifdef PRINTBANG_WANT_LONG_LONG
 void bang_ulonglong(unsigned long long value, unsigned char base);
 void bang_longlong(long long value, unsigned char base);
-#endif
-#ifdef PRINTBANG_WANT_FLOAT
 void bang_float(float value, unsigned char places);
-#endif
 
 #else // PRINTBANG_IMPLEMENTATION
 
@@ -423,69 +410,54 @@ void NU(unsigned T value, unsigned char base) \
     } \
     bang_char((base > 10 && mod >= 10) ? ('A' - 10) + mod : '0' + mod); \
 } \
-void NS(T value, unsigned char base) \
+void NS(signed T value, unsigned char base) \
 { \
     if (value < 0) \
     { \
         bang_char('-'); \
-        NU(-value, base); \
+        NU((unsigned T)(-value), base); \
     } \
     else \
     { \
-        NU(value, base); \
+        NU((unsigned T)(value), base); \
     } \
 }
 
 /**
-#### `PRINTBANG_WANT_INT` ([source]({anchor}))
-#### `void bang_uint(unsigned int value, unsigned char base)`
+#### `void bang_uint(unsigned int value, unsigned char base)` ([source]({anchor}))
 #### `void bang_int(int value, unsigned char base)`
-If `PRINTBANG_WANT_INT` is defined, the functions for transmitting
-`unsigned int` and `int` values will be declared or defined. The passed value is
+Transmits `unsigned int` respectively `int` values. The passed value is
 formatted in a given `base`.
 **/
-#ifdef PRINTBANG_WANT_INT
 _DEFINE_BANG_INT(int, bang_uint, bang_int);
-#endif
 
 /**
-#### `PRINTBANG_WANT_LONG` ([source]({anchor}))
-#### `void bang_ulong(unsigned long value, unsigned char base)`
+#### `void bang_ulong(unsigned long value, unsigned char base)` ([source]({anchor}))
 #### `void bang_long(long value, unsigned char base)`
-If `PRINTBANG_WANT_LONG` is defined, the functions for transmitting
-`unsigned long` and `long` values will be declared or defined. The passed value
+Transmits `unsigned long` respectively `long` values. The passed value is
+formatted in a given `base`.
+**/
+_DEFINE_BANG_INT(long, bang_ulong, bang_long);
+
+/**
+#### `void bang_ulonglong(unsigned long long value, unsigned char base` ([source]({anchor}))
+#### `void bang_longlong(long long value, unsigned char base)`
+Transmits `unsigned long long` respectively `long long` values. The passed value
 is formatted in a given `base`.
 **/
-#ifdef PRINTBANG_WANT_LONG
-_DEFINE_BANG_INT(long, bang_ulong, bang_long);
-#endif
-
-/**
-#### `PRINTBANG_WANT_LONG_LONG` ([source]({anchor}))
-#### `void bang_ulonglong(unsigned long long value, unsigned char base`
-#### `void bang_longlong(long long value, unsigned char base)`
-If `PRINTBANG_WANT_LONG_LONG` is defined, the functions for transmitting
-`unsigned long long` and `long long` values will be declared or defined. The
-passed value is formatted in a given `base`.
-**/
-#ifdef PRINTBANG_WANT_LONG_LONG
 _DEFINE_BANG_INT(long long, bang_ulonglong, bang_longlong);
-#endif
 
 #undef _DEFINE_BANG_INT
 
 /**
-#### `PRINTBANG_WANT_FLOAT` ([source]({anchor}))
-#### `void bang_float(float value, unsigned char base)`
-If `PRINTBANG_WANT_FLOAT` is defined, the function for transmitting `float`
-values will be declared or defined. The floating point formatting is very
-rudimentary and will simply concatenate the number to a given number of decimal
-`places`. One trailing zero is always appended.
+#### `void bang_float(float value, unsigned char base)` ([source]({anchor}))
+Transmits `float` values. The floating point formatting is very rudimentary and
+will simply concatenate the number to a given number of decimal `places`. One
+trailing zero is always appended.
 
 Since `double` is an alias for `float` in avr-libc, this function should be used
 for `double` values as well.
 **/
-#ifdef PRINTBANG_WANT_FLOAT
 void bang_float(float value, unsigned char places)
 {
     if (isnan(value))
@@ -516,7 +488,6 @@ void bang_float(float value, unsigned char places)
         bang_char('0' + digit);
     } while (value > 0 && (--places));
 }
-#endif
 
 /**
 #### `void bang(...)` ([source]({anchor}))
@@ -537,22 +508,14 @@ void bang(char chr) { bang_char(chr); }
 void bang(unsigned char chr) { bang_char(chr); }
 void bang(char *str) { bang_str(str); }
 void bang(const char *str) { bang_pstr(str); }
-#ifdef PRINTBANG_WANT_INT
 void bang(int value, unsigned char base = 10) { bang_int(value, base); }
 void bang(unsigned int value, unsigned char base = 10) { bang_uint(value, base); }
-#endif
-#ifdef PRINTBANG_WANT_LONG
 void bang(long value, unsigned char base = 10) { bang_long(value, base); }
 void bang(unsigned long value, unsigned char base = 10) { bang_ulong(value, base); }
-#endif
-#ifdef PRINTBANG_WANT_LONG_LONG
 void bang(long long value, unsigned char base = 10) { bang_longlong(value, base); }
 void bang(unsigned long long value, unsigned char base = 10) { bang_ulonglong(value, base); }
-#endif
-#ifdef PRINTBANG_WANT_FLOAT
 void bang(float value, unsigned char places = 4) { bang_float(value, places); }
 void bang(double value, unsigned char places = 4) { bang_float(value, places); }
-#endif
 
 #else // __cplusplus
 
@@ -569,7 +532,7 @@ void bang(double value, unsigned char places = 4) { bang_float(value, places); }
     long long: bang_longlong, \
     unsigned long long: bang_ulonglong, \
     float: bang_float, \
-    double: bang_float, \
+    double: bang_float \
 )(A __VA_OPT__(,) __VA_ARGS__)
 
 #endif // __cplusplus

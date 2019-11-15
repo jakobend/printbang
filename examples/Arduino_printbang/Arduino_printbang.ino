@@ -3,7 +3,6 @@
 
 #define PRINTBANG_PORT PORTB
 #define PRINTBANG_PIN PB0
-#define PRINTBANG_WANT_INT
 #define PRINTBANG_IMPLEMENTATION
 #include "printbang.h"
 

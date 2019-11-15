@@ -10,6 +10,7 @@ AVR_MCU(F_CPU, MCU);
 #define PRINTBANG_PORT PORTB
 #define PRINTBANG_PIN PB0
 #define PRINTBANG_DATA_BITS 7
+#define PRINTBANG_IMPLEMENTATION
 #include <printbang.h>  
 
 int main(void)
